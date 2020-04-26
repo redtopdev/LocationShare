@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>ShareLocation.CacheManager</AssemblyName>
+    <RootNamespace>ShareLocation.CacheManager</RootNamespace>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Engaze.Core.DataContract" Version="1.0.7-alpha" />
+	</ItemGroup>
+
+</Project>
