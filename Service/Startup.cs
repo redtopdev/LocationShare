@@ -3,6 +3,7 @@
 /// </summary>
 namespace ShareLocation.Service
 {
+    using Engaze.Core.MessageBroker.Consumer;
     using Engaze.Core.Web;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.Extensions.Configuration;
@@ -16,8 +17,10 @@ namespace ShareLocation.Service
 
         public override void ConfigureComponentServices(IServiceCollection services)
         {           
-            services.AddTransient<ILocationManager, LocationManager>();
-            services.AddTransient<ILocationCacheManager, LocationCacheManager>();
+            services.AddSingleton<ILocationManager, LocationManager>();
+            services.AddSingleton<ILocationCacheManager, LocationCacheManager>();
+            var sp = services.BuildServiceProvider();
+            services.ConfigureConsumerService(base.Configuration, new EventMessageHandler(sp.GetService<ILocationManager>()));
         }
 
         public override void ConfigureComponent(IApplicationBuilder app)

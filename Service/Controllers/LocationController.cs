@@ -9,6 +9,7 @@ namespace ShareLocation.Service
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using System;
+   
 
     [ApiController]
     public class LocationController : ControllerBase
@@ -44,6 +45,8 @@ namespace ShareLocation.Service
             locationManager.SetLocation(userId, location);
 
             return new StatusCodeResult(StatusCodes.Status201Created);
+
+
         }
     }
 }
