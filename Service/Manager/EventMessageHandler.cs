@@ -1,4 +1,5 @@
-﻿using Engaze.Core.MessageBroker.Consumer;
+﻿using Engaze.Core.DataContract;
+using Engaze.Core.MessageBroker.Consumer;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
@@ -33,24 +34,27 @@ namespace ShareLocation.Service
 
         private Task ProcessMessage(JObject msgJObject)
         {
-            string eventType = msgJObject.Value<string>("EventType");
+            OccuredEventType eventType = msgJObject.Value<OccuredEventType>("EventType");
             JObject eventoObject = msgJObject.Value<JObject>("Data");
-            var eventId = eventoObject.Value<Guid>("EventId");          
+            var eventId = eventoObject.Value<Guid>("EventId");
 
             switch (eventType)
-            {                   
-                case "EventoDeleted":
+            {
+                case OccuredEventType.EventDeleted:
                     locationManager.ClearEventAndUserLocations(eventId);
                     break;
 
-                case "EventoEnded":
+                case OccuredEventType.EventEnded:
                     locationManager.ClearEventAndUserLocations(eventId);
                     break;
 
-                case "ParticipantLeft":
-                    var userId = eventoObject.Value<Guid>("UserId");
-                    locationManager.ClearUserLocations(userId, eventId);
-                    break;             
+                case OccuredEventType.ParticipantLeft:                   
+                    locationManager.ClearUserLocations(eventoObject.Value<Guid>("UserId"), eventId);
+                    break;
+
+                case OccuredEventType.ParticipantStateUpdated:                   
+                    locationManager.ClearUserLocations(eventoObject.Value<Guid>("UserId"), eventId);
+                    break;
 
                 default:
                     break;

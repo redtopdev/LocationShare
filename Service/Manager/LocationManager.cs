@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace ShareLocation.Service
@@ -29,27 +28,33 @@ namespace ShareLocation.Service
             cacheManager.SaveLocation(userId, location);
         }
 
-        public async Task<Dictionary<Guid, Location>> GetLocations(Guid userId,  Guid eventId)
+        public async Task<string>  ValidateLocationRequest(Guid userId, Guid eventId)
         {
-            if(eventUserList[eventId]?.Any(eventUserid=> eventUserid == eventId) ?? false)
+            string message = string.Empty;
+            if (eventUserList[eventId]?.Any(eventUserid => eventUserid == eventId) ?? false)
             {
                 var result = await eventQueryClient.GetEventsByUserIdAsync(userId);
                 if (result == null)
                 {
-                    throw HttpHelper.CreateHttpResponseException(HttpStatusCode.BadRequest, 
-                        $"No running event found for the user {userId}");                     
+                    message = $"No running event found for the user {userId}";                                      
                 }
 
-                eventUserList[eventId] = result.Select(evnt=>evnt.InitiatorId).ToList();
-                if(!result.Any(evnt => evnt.InitiatorId == eventId))
+                eventUserList[eventId] = result.Select(evnt => evnt.EventId).ToList();
+                if (!result.Any(evnt => evnt.EventId == eventId))
                 {
-                    throw HttpHelper.CreateHttpResponseException(HttpStatusCode.BadRequest,
-                        $"user {userId} is not an active participant for the event {eventId} ");
+                    message = $"user {userId} is not an active participant for the event {eventId} ";                  
                 }
-
             }
 
-            return cacheManager.GetLocations(eventUserList[eventId]);            
+            return message;
+        }
+
+        public Dictionary<Guid, Location> GetLocations(Guid userId,  Guid eventId)
+        {
+            
+
+            return cacheManager.GetLocations(eventUserList[eventId]);
+                      
         }
 
         public void ClearEventAndUserLocations(Guid eventId)

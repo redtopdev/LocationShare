@@ -9,7 +9,7 @@ namespace ShareLocation.Service
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
     using System;
-   
+    using System.Threading.Tasks;
 
     [ApiController]
     public class LocationController : ControllerBase
@@ -24,9 +24,16 @@ namespace ShareLocation.Service
 
 
         [HttpGet("location/{eventId:guid}/{userId:guid}")]
-        public IActionResult Get(Guid userId, Guid eventId)
+        public async Task<IActionResult> Get(Guid userId, Guid eventId)
         {
             logger.LogInformation("Getting location");
+
+            //validate 
+            string message = await locationManager.ValidateLocationRequest(userId, eventId);
+            if (string.IsNullOrEmpty(message))
+            {
+                return BadRequest(message);
+            }
 
             //put try catch only when you want to return custom message or status code, else this will
             //be caught in ExceptionHandling middleware so no need to put try catch here
@@ -45,8 +52,6 @@ namespace ShareLocation.Service
             locationManager.SetLocation(userId, location);
 
             return new StatusCodeResult(StatusCodes.Status201Created);
-
-
         }
     }
 }

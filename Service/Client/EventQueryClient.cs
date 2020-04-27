@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 
 namespace ShareLocation.Service.Client
 {
@@ -45,9 +44,8 @@ namespace ShareLocation.Service.Client
                     return null;
                 }
 
-                throw HttpHelper.CreateHttpResponseException(HttpStatusCode.InternalServerError,
-                    $"Call to the service {response.RequestMessage.RequestUri} " +
-                    $"failed with the status code : {response.StatusCode} and reason phrase :{ response.ReasonPhrase}");               
+                throw new Exception($"Call to the service {response.RequestMessage.RequestUri} " +
+                    $"failed with the status code : {response.StatusCode} and reason phrase :{ response.ReasonPhrase}");
 
             }
         }
