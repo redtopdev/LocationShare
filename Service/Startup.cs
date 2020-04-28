@@ -10,6 +10,7 @@ namespace ShareLocation.Service
     using Microsoft.Extensions.DependencyInjection;
     using Serilog;
     using ShareLocation.CacheManager;
+    using ShareLocation.Service.Client;
 
     public class Startup : EngazeStartup
     {
@@ -19,6 +20,7 @@ namespace ShareLocation.Service
         {           
             services.AddSingleton<ILocationManager, LocationManager>();
             services.AddSingleton<ILocationCacheManager, LocationCacheManager>();
+            services.AddSingleton<IEventQueryClient, EventQueryClient>();
             var sp = services.BuildServiceProvider();
             services.ConfigureConsumerService(base.Configuration, new EventMessageHandler(sp.GetService<ILocationManager>()));
         }
