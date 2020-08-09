@@ -30,14 +30,21 @@ namespace ShareLocation.Service
 
         public async Task<string> ValidateLocationRequest(Guid userId, Guid eventId)
         {
-            if (!eventUserList[eventId]?.Any(eventUserid => eventUserid == userId) ?? true)
+            //if (!eventUserList[eventId]?.Any(eventUserid => eventUserid == userId) ?? true)
+            if (eventUserList.ContainsKey(eventId))
+            {
+                if (eventUserList[eventId].Any(eventUserid => eventUserid == userId))
+                    return string.Empty;
+                else
+                    return $"user {userId} is not an active participant for the event {eventId} ";
+            }
+            else            
             {
                 var result = await eventQueryClient.GetEventsByUserIdAsync(userId);
                 if (result == null)
                 {
                     return $"No running event found for the user {userId}";                    
                 }
-
                 result.ToList().ForEach(evnt =>
                 {
                     eventUserList[evnt.EventId] = evnt.Participants.ToList();
