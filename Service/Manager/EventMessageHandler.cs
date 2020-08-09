@@ -40,11 +40,11 @@ namespace ShareLocation.Service
 
             switch (eventType)
             {
-                case OccuredEventType.EventDeleted:
+                case OccuredEventType.EventoDeleted:
                     locationManager.ClearEventAndUserLocations(eventId);
                     break;
 
-                case OccuredEventType.EventEnded:
+                case OccuredEventType.EventoEnded:
                     locationManager.ClearEventAndUserLocations(eventId);
                     break;
 

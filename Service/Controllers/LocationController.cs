@@ -8,7 +8,9 @@ namespace ShareLocation.Service
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
 
     [ApiController]
@@ -36,9 +38,9 @@ namespace ShareLocation.Service
             }
 
             //put try catch only when you want to return custom message or status code, else this will
-            //be caught in ExceptionHandling middleware so no need to put try catch here
-
-            return Ok(locationManager.GetLocations(eventId));
+            //be caught in ExceptionHandling middleware so no need to put try catch here            
+            var result = locationManager.GetLocations(eventId);
+            return new OkObjectResult(result.Keys.Select(key => new { UserId = key, Location = result[key] }));
         }
 
         [HttpPost("location/{userId:guid}")]
@@ -46,6 +48,7 @@ namespace ShareLocation.Service
         {
             logger.LogInformation("Saving location");
 
+            location.CreatedOn = DateTime.UtcNow;
             //put try catch only when you want to return custom message or status code, else this will
             //be caught in ExceptionHandling middleware so no need to put try catch here
 

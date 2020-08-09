@@ -11,8 +11,8 @@ namespace ShareLocation.Service
 {
     public class LocationManager : ILocationManager
     {
-        private ILocationCacheManager cacheManager;
-        private IEventQueryClient eventQueryClient;
+        private readonly ILocationCacheManager cacheManager;
+        private readonly IEventQueryClient eventQueryClient;
 
         private ConcurrentDictionary<Guid, List<Guid>> eventUserList = new ConcurrentDictionary<Guid, List<Guid>>();
 
@@ -30,17 +30,17 @@ namespace ShareLocation.Service
 
         public async Task<string> ValidateLocationRequest(Guid userId, Guid eventId)
         {
-            if (!eventUserList[eventId]?.Any(eventUserid => eventUserid == userId) ?? true)
+            if (!(eventUserList.TryGetValue(eventId, out var userIds) && userIds.ToList().Any(eventUserid => eventUserid == userId)))
             {
                 var result = await eventQueryClient.GetEventsByUserIdAsync(userId);
-                if (result == null)
+                if (!(result?.Any() ?? false))
                 {
-                    return $"No running event found for the user {userId}";                    
+                    return $"No running event found for the user {userId}";
                 }
 
                 result.ToList().ForEach(evnt =>
                 {
-                    eventUserList[evnt.EventId] = evnt.Participants.ToList();
+                    eventUserList[evnt.EventId] = evnt.Participants.Select(p => p.UserId).ToList();
                 });
                 //eventUserList[eventId] = result.Select(evnt => evnt.Participants.ToList());
                 if (!result.Any(evnt => evnt.EventId == eventId))
