@@ -14,7 +14,7 @@ namespace ShareLocation.Service
         private ILocationCacheManager cacheManager;
         private IEventQueryClient eventQueryClient;
 
-        private ConcurrentDictionary<Guid, List<Guid>> eventUserList = new ConcurrentDictionary<Guid, List<Guid>>();       
+        private ConcurrentDictionary<Guid, List<Guid>> eventUserList = new ConcurrentDictionary<Guid, List<Guid>>();
 
         public LocationManager(ILocationCacheManager cacheManager, IEventQueryClient eventQueryClient)
         {
@@ -28,39 +28,39 @@ namespace ShareLocation.Service
             cacheManager.SaveLocation(userId, location);
         }
 
-        public async Task<string>  ValidateLocationRequest(Guid userId, Guid eventId)
+        public async Task<string> ValidateLocationRequest(Guid userId, Guid eventId)
         {
-            string message = string.Empty;
-            if (eventUserList[eventId]?.Any(eventUserid => eventUserid == eventId) ?? false)
+            if (!eventUserList[eventId]?.Any(eventUserid => eventUserid == userId) ?? true)
             {
                 var result = await eventQueryClient.GetEventsByUserIdAsync(userId);
                 if (result == null)
                 {
-                    message = $"No running event found for the user {userId}";                                      
+                    return $"No running event found for the user {userId}";                    
                 }
 
-                eventUserList[eventId] = result.Select(evnt => evnt.EventId).ToList();
+                result.ToList().ForEach(evnt =>
+                {
+                    eventUserList[evnt.EventId] = evnt.Participants.ToList();
+                });
+                //eventUserList[eventId] = result.Select(evnt => evnt.Participants.ToList());
                 if (!result.Any(evnt => evnt.EventId == eventId))
                 {
-                    message = $"user {userId} is not an active participant for the event {eventId} ";                  
+                    return $"user {userId} is not an active participant for the event {eventId} ";
                 }
             }
 
-            return message;
+            return string.Empty;
         }
 
-        public Dictionary<Guid, Location> GetLocations(Guid userId,  Guid eventId)
+        public Dictionary<Guid, Location> GetLocations(Guid eventId)
         {
-            
-
             return cacheManager.GetLocations(eventUserList[eventId]);
-                      
         }
 
         public void ClearEventAndUserLocations(Guid eventId)
         {
             List<Guid> userIds;
-            if(!eventUserList.TryRemove(eventId, out userIds))
+            if (!eventUserList.TryRemove(eventId, out userIds))
             {
                 return;
             }
@@ -68,7 +68,7 @@ namespace ShareLocation.Service
             List<Guid> userIdsToRemove = new List<Guid>();
             userIds.ForEach(userId =>
             {
-                if(!eventUserList.Values.Any(userList=> userList.Contains(userId)))
+                if (!eventUserList.Values.Any(userList => userList.Contains(userId)))
                 {
                     userIdsToRemove.Add(userId);
                 }
@@ -84,8 +84,8 @@ namespace ShareLocation.Service
                 if (!eventUserList.Values.Any(userList => userList.Contains(userId)))
                 {
                     cacheManager.RemoveLocation(userId);
-                }               
+                }
             }
-        }       
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace ShareLocation.Service
     {
         void SetLocation(Guid userId, Location location);
 
-        Dictionary<Guid, Location> GetLocations(Guid userId, Guid eventId);
+        Dictionary<Guid, Location> GetLocations(Guid eventId);
 
         Task<string> ValidateLocationRequest(Guid userId, Guid eventId);
 

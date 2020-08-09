@@ -23,14 +23,14 @@ namespace ShareLocation.Service
         }
 
 
-        [HttpGet("location/{eventId:guid}/{userId:guid}")]
-        public async Task<IActionResult> Get(Guid userId, Guid eventId)
+        [HttpGet("location/{eventId:guid}/{requesterId:guid}")]
+        public async Task<IActionResult> Get(Guid requesterId, Guid eventId)
         {
             logger.LogInformation("Getting location");
 
             //validate 
-            string message = await locationManager.ValidateLocationRequest(userId, eventId);
-            if (string.IsNullOrEmpty(message))
+            string message = await locationManager.ValidateLocationRequest(requesterId, eventId);
+            if (!string.IsNullOrEmpty(message))
             {
                 return BadRequest(message);
             }
@@ -38,7 +38,7 @@ namespace ShareLocation.Service
             //put try catch only when you want to return custom message or status code, else this will
             //be caught in ExceptionHandling middleware so no need to put try catch here
 
-            return Ok(locationManager.GetLocations(userId, eventId));
+            return Ok(locationManager.GetLocations(eventId));
         }
 
         [HttpPost("location/{userId:guid}")]
